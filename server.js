@@ -151,6 +151,28 @@ app.get('/users', async (req, res) => {
   }
 });
 
+app.patch('/users/:EmpId/cart/:productId', async (req, res) => {
+  const { EmpId, productId } = req.params;
+  const { status } = req.body;
+
+  try {
+    const user = await User.findOne({ EmpId });
+    if (!user) return res.status(404).send('User not found');
+
+    const item = user.cart.find(item => item.productId === productId);
+    if (!item) return res.status(404).send('Cart item not found');
+
+    item.status = status;
+    await user.save();
+
+    res.status(200).send('Cart item status updated');
+  } catch (error) {
+    console.error('Error updating cart item status:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+
 // Route to add to cart
 app.post("/addToCart/:productId", async (req, res) => {
   const { productId } = req.params;
